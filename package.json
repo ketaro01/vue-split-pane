@@ -10,8 +10,15 @@
     "percent",
     "split-pane-pixel"
   ],
-  "repository": "https://github.com/ketaro01/vue-split-pane",
-  "author": "ketaro01 <ketaro01@naver.com>",
+  "author": "liam <ketaro01@naver.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ketaro01/vue-split-pane"
+  },
+  "bugs": {
+    "url": "https://github.com/ketaro01/vue-split-pane"
+  },
   "main": "dist/splitPane.common.js",
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -20,7 +27,6 @@
     "lint": "vue-cli-service lint",
     "publish": "npm publish --access-public"
   },
-  "license": "MIT",
   "dependencies": {
     "core-js": "^3.6.5",
     "sass-loader": "^10.0.3",
