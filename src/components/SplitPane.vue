@@ -23,8 +23,8 @@
             :style="getToggleOption.style"
             @click="handleOpenArea"
           >
-            <div class="handle-open-icon">
-              >
+            <div class="handle-open-dots">
+              <span />
             </div>
           </div>
         </slot>
@@ -47,274 +47,330 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { TOGGLE_OPTION } from '@/constants';
 
-export default {
-  name: 'SplitPane',
-  props: {
-    // 세로 모드 ( 높낮이 조절을 위한 )
-    vertical: {
-      type: Boolean,
-      default: false,
-    },
-    // toggle
-    useToggle: {
-      type: Boolean,
-      default: false,
-    },
-    toggleOption: {
-      type: Object,
-      default: () => ({
-        showHandle: TOGGLE_OPTION.SHOW_HANDLE, // handle 표시 여부
-        toggleSize: TOGGLE_OPTION.TOGGLE_SIZE, // toggle btn size
-        icon: TOGGLE_OPTION.ICON, // mdi-icon name
-        style: {},
-      }),
-    },
-    minSize: {
-      validator: (value) => (
-        typeof value === 'number' || /^([0-9]+|[0-9]+(px|%))$/.test(value)
-      ),
-      type: [Number, String],
-      default: null,
-    },
-    validMinRight: {
-      type: Boolean,
-      default: true,
-    },
-    maxSize: {
-      validator: (value) => (
-        typeof value === 'number' || /^([0-9]+|[0-9]+(px|%))$/.test(value)
-      ),
-      type: [Number, String],
-      default: null,
-    },
-    size: {
-      validator: (value) => (
-        typeof value === 'number' || /^([0-9]+|[0-9]+(px|%))$/.test(value)
-      ),
-      type: [Number, String],
-      default: 100,
-    },
-    largeHandle: {
-      type: Boolean,
-      default: true,
-    },
-  },
-  data() {
+interface ToggleOptions {
+  showHandle: boolean;
+  toggleSize: number;
+  style: object;
+}
+
+interface SizeInfo {
+  type: string;
+  value: number;
+}
+
+interface PaneStyle {
+  left: {
+    flex?: string|number;
+    width?: string;
+    height?: string;
+  };
+  right: {
+    flex?: string|number;
+    width?: string;
+    height?: string;
+  };
+}
+
+interface SplitStyle {
+  userSelect: string;
+  cursor: string;
+}
+
+@Component
+export default class SplitPane extends Vue {
+  @Prop({
+    type: Boolean,
+    required: false,
+    default: false,
+  })
+  readonly horizontal: boolean
+
+  @Prop({
+    type: Boolean,
+    required: false,
+    default: false,
+  })
+  readonly useToggle: boolean
+
+  @Prop({
+    type: Object,
+    default: () => ({
+      showHandle: TOGGLE_OPTION.SHOW_HANDLE, // handle 표시 여부
+      toggleSize: TOGGLE_OPTION.TOGGLE_SIZE, // toggle btn size
+      style: {},
+    }),
+  })
+  readonly toggleOption: ToggleOptions
+
+  @Prop({
+    type: [Number, String],
+    default: null,
+    validator: (value) => (
+      typeof value === 'number' || /^([0-9]+|[0-9]+(px|%))$/.test(value)
+    ),
+  })
+  readonly minSize: number|string
+
+  @Prop({
+    type: Boolean,
+    default: true,
+  })
+  readonly validMinRight: boolean
+
+  @Prop({
+    type: [Number, String],
+    default: null,
+    validator: (value) => (
+      typeof value === 'number' || /^([0-9]+|[0-9]+(px|%))$/.test(value)
+    ),
+  })
+  readonly maxSize: number|string
+
+  @Prop({
+    type: [Number, String],
+    default: 100,
+    validator: (value) => (
+      typeof value === 'number' || /^([0-9]+|[0-9]+(px|%))$/.test(value)
+    ),
+  })
+  readonly size: number|string
+
+  @Prop({
+    type: Boolean,
+    default: false,
+  })
+  readonly largeHandle: boolean
+
+  private active = false;
+
+  private hasMoved = false;
+
+  private splitClass = this.horizontal ? 'split horizontal' : 'split vertical';
+
+  private pageSize = 0;
+
+  private pixel: number|null = null;
+
+  get currentPixel(): number {
+    return this.pixel || 0;
+  }
+
+  get paneStyles(): PaneStyle {
+    if (!this.currentPixel && this.currentPixel !== 0) {
+      return {
+        left: {},
+        right: {},
+      };
+    }
     return {
-      active: false,
-      hasMoved: false,
-      type: this.vertical ? 'height' : 'width',
-      splitClass: this.vertical ? 'split vertical' : 'split horizontal',
-      pixel: null,
+      left: {
+        flex: `${this.currentPixel * 100} 1 0%`,
+      },
+      right: {
+        flex: `${(this.pageSize - this.currentPixel) * 100} 1 0%`,
+      },
     };
-  },
-  computed: {
-    paneStyles() {
-      if (!this.pixel && this.pixel !== 0) {
-        const initSize = typeof this.size === 'number' ? `${this.size}px` : this.size;
-        return {
-          left: {
-            flex: '0 0 auto',
-            [this.type]: initSize,
-          },
-          right: {
-            flex: 1,
-          },
-        };
-      }
-      return {
-        left: {
-          [this.type]: `${this.pixel}px`,
-        },
-        right: {
-          [this.type]: `${this.pageSize - this.pixel}px`,
-        },
-      };
-    },
-    showToggle() {
-      const { toggleSize } = this.getToggleOption;
-      return this.useToggle && (this.isMinimum || this.pixel <= toggleSize);
-    },
-    showHandle() {
-      return !this.showToggle || (this.showToggle && this.getToggleOption.showHandle);
-    },
-    isMinimum() {
-      if (!this.pixel && this.pixel !== 0) return false;
+  }
 
-      const minSize = this.getPixel(this.minSize);
-      return minSize && this.pixel <= minSize;
-    },
-    pageSize() {
-      if (!this.$refs.splitBase) return null;
-      const { offsetWidth, offsetHeight } = this.$refs.splitBase;
-      const pageSize = this.vertical ? offsetHeight : offsetWidth;
-      const { boxOffset } = this.getOffset(this.$refs.splitBase);
-      return pageSize - boxOffset;
-    },
-    splitStyle() {
-      const cursor = this.vertical ? 'row-resize' : 'col-resize';
-      return {
-        userSelect: this.active ? 'none' : '',
-        cursor: this.active ? cursor : '',
-      };
-    },
-    getToggleOption() {
-      const {
-        showHandle,
-        toggleSize,
-        icon,
-        style,
-      } = this.toggleOption;
+  get showToggle(): boolean {
+    const { toggleSize } = this.getToggleOption;
+    return this.useToggle && (this.isMinimum || this.currentPixel <= toggleSize);
+  }
 
-      return {
-        showHandle: showHandle || TOGGLE_OPTION.SHOW_HANDLE,
-        toggleSize: toggleSize || TOGGLE_OPTION.TOGGLE_SIZE,
-        icon: icon || TOGGLE_OPTION.ICON,
-        style: style || {},
-      };
-    },
-  },
+  get showHandle(): boolean {
+    return !this.showToggle || (this.showToggle && this.getToggleOption.showHandle);
+  }
+
+  get isMinimum(): boolean {
+    if (!this.currentPixel && this.currentPixel !== 0) return false;
+
+    const minSize = SplitPane.getPixel(this.minSize);
+
+    if (!minSize) return false;
+
+    return this.currentPixel <= minSize;
+  }
+
+  get splitStyle(): SplitStyle {
+    const cursor = this.horizontal ? 'row-resize' : 'col-resize';
+    return {
+      userSelect: this.active ? 'none' : '',
+      cursor: this.active ? cursor : '',
+    };
+  }
+
+  get getToggleOption(): ToggleOptions {
+    const {
+      showHandle,
+      toggleSize,
+      style,
+    } = this.toggleOption;
+
+    return {
+      showHandle: showHandle || TOGGLE_OPTION.SHOW_HANDLE,
+      toggleSize: toggleSize || TOGGLE_OPTION.TOGGLE_SIZE,
+      style: style || {},
+    };
+  }
+
   mounted() {
-    this.pixel = this.getPixel(this.size, this.pageSize);
-  },
-  methods: {
-    getSize(value) {
-      if (!value) return null;
-      if (typeof value === 'number') return { type: 'px', value };
-      const nValue = parseInt(value.replace(/(px|%)/, ''), 10);
-      if (Number.isNaN(nValue)) return null;
-      if (value.indexOf('px') > -1) return { type: 'px', value: nValue };
-      if (value.indexOf('%') > -1) return { type: '%', value: nValue };
-      return null;
-    },
-    /**
-     * mousedown handler
-     */
-    handleMouseDown() {
-      this.active = true;
-      this.hasMoved = false;
-    },
-    /**
-     * mouseup handler
-     */
-    handleMouseUp() {
+    this.resetSplitPane();
+    window.addEventListener('resize', this.onResize, { passive: true });
+  }
+
+  beforeDestroy() {
+    window.removeEventListener('resize', this.onResize, false);
+  }
+
+  updated() {
+    if (!this.pageSize) {
+      this.pageSize = this.getPageSize();
+    }
+  }
+
+  private resetSplitPane(): void {
+    this.pageSize = this.getPageSize();
+    this.pixel = SplitPane.getPixel(this.size, this.pageSize);
+  }
+
+  private onResize(): void {
+    setTimeout(() => {
+      this.pageSize = this.getPageSize();
+    }, 200);
+  }
+
+  private getPageSize(): number {
+    if (!this.$refs.splitBase) return 0;
+    const { offsetWidth, offsetHeight } = this.$refs.splitBase as HTMLElement;
+    return this.horizontal ? offsetHeight : offsetWidth;
+  }
+
+  private handleMouseDown(): void {
+    this.active = true;
+    this.hasMoved = false;
+  }
+
+  private handleMouseUp(): void {
+    this.active = false;
+  }
+
+  private handleMouseMove(e: MouseEvent): void {
+    if (e.buttons === 0 || e.which === 0) {
       this.active = false;
-    },
-    /**
-     * mousemove handler
-     * @param e
-     */
-    handleMouseMove(e) {
-      if (e.buttons === 0 || e.which === 0) {
-        this.active = false;
-      }
+    }
 
-      if (this.active) {
-        const { offset, boxOffset } = this.getOffset(e.currentTarget);
+    if (this.active) {
+      const offset = this.getOffset(e.currentTarget as HTMLElement);
 
-        const currentPage = this.vertical ? e.pageY : e.pageX;
-        const targetOffset = (
-          this.vertical
-            ? e.currentTarget.offsetHeight
-            : e.currentTarget.offsetWidth
-        );
-        const pageSize = targetOffset - boxOffset;
-        const pixel = currentPage - offset;
-        this.setPixel(pixel, pageSize);
-      }
-      this.hasMoved = false;
-    },
-    getOffset(element) {
-      let offset = 0;
-      let boxOffset = 0;
-      let target = element;
-      while (target) {
-        offset += this.vertical ? target.offsetTop : target.offsetLeft;
-        const styles = window.getComputedStyle(target);
-        boxOffset += this.vertical
-          ? parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight)
-          : parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
-        boxOffset += this.vertical
-          ? parseFloat(styles.marginLeft) + parseFloat(styles.marginRight)
-          : parseFloat(styles.marginTop) + parseFloat(styles.marginBottom);
-        target = target.offsetParent;
-      }
-      return {
-        offset,
-        boxOffset,
-      };
-    },
-    setPixel(pixel, pageSize) {
-      const minPixel = this.getPixel(this.minSize, pageSize);
+      const currentPage = this.horizontal ? e.pageY : e.pageX;
+      const { offsetHeight, offsetWidth } = e.currentTarget as HTMLElement;
 
-      if (minPixel && pixel < minPixel) {
-        this.pixel = minPixel;
-        return;
-      }
+      const pageSize = this.horizontal
+        ? offsetHeight
+        : offsetWidth;
+      const pixel = currentPage - offset;
 
-      if (this.validMinRight && minPixel && pixel > pageSize - minPixel) {
-        this.pixel = pageSize - minPixel;
-        return;
-      }
+      this.pageSize = pageSize;
+      this.setPixel(pixel, pageSize);
+    }
+    this.hasMoved = false;
+  }
 
-      const maxPixel = this.getPixel(this.maxSize, pageSize);
+  private getOffset(element: HTMLElement): number {
+    let offset = 0;
+    let target = element;
+    while (target) {
+      offset += this.horizontal ? target.offsetTop : target.offsetLeft;
+      target = target.offsetParent as HTMLElement;
+    }
+    return offset;
+  }
 
-      if (maxPixel && pixel > maxPixel) {
-        this.pixel = maxPixel;
-        return;
-      }
+  private setPixel(pixel: number, pageSize: number): void {
+    const minPixel = SplitPane.getPixel(this.minSize, pageSize);
 
-      if (pixel > pageSize) {
-        this.pixel = pageSize;
-        return;
-      }
+    if (minPixel && pixel < minPixel) {
+      this.pixel = minPixel;
+      return;
+    }
 
-      this.pixel = pixel;
-    },
-    getPixel(size, pageSize) {
-      const sizeInfo = this.getSize(size);
+    if (this.validMinRight && minPixel && pixel > pageSize - minPixel) {
+      this.pixel = pageSize - minPixel;
+      return;
+    }
 
-      if (!sizeInfo) return null;
+    const maxPixel = SplitPane.getPixel(this.maxSize, pageSize);
 
-      const { type, value } = sizeInfo;
+    if (maxPixel && pixel > maxPixel) {
+      this.pixel = maxPixel;
+      return;
+    }
 
-      if (type === '%') {
-        return (pageSize * value) / 100;
-      }
+    if (pixel > pageSize) {
+      this.pixel = pageSize;
+      return;
+    }
 
-      return value;
-    },
-    /**
-     * pane area open
-     */
-    handleOpenArea() {
-      this.pixel = null;
-    },
-  },
-};
+    this.pixel = pixel;
+  }
+
+  private handleOpenArea(): void {
+    this.resetSplitPane();
+  }
+
+  static getPixel(size: number|string, pageSize?: number): number {
+    const sizeInfo = SplitPane.getSize(size);
+
+    if (!sizeInfo) return 0;
+
+    const { type, value } = sizeInfo;
+
+    if (type === '%') {
+      if (!pageSize) return 0;
+
+      return (pageSize * value) / 100;
+    }
+
+    return value;
+  }
+
+  static getSize(value: number|string): SizeInfo|null {
+    if (!value) return null;
+    if (typeof value === 'number') return { type: 'px', value };
+    const nValue = parseInt(value.replace(/(px|%)/, ''), 10);
+    if (Number.isNaN(nValue)) return null;
+    if (!/(px|%)/.test(value) || value.indexOf('px') > -1) return { type: 'px', value: nValue };
+    if (value.indexOf('%') > -1) return { type: '%', value: nValue };
+    return null;
+  }
+}
 </script>
 <style lang="scss" scoped>
 .split {
-  width: 100%;
   height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: row;
+  flex: 1;
+  box-sizing: border-box;
   > .pane {
-    height: 100%;
     position: relative;
     outline: none;
+    min-width: 0;
+    min-height: 0;
   }
   > .handle {
     position: relative;
+    background-color: #ccc;
     &::before {
       content: '';
       position: absolute;
       transition: opacity 0.4s;
-      background-color: rgb(0,0,0,0.3);
+      background-color: rgba(0,0,0,0.3);
       z-index: 1;
       opacity: 0;
     }
@@ -323,7 +379,7 @@ export default {
     opacity: 1;
   }
 
-  &.horizontal {
+  &.vertical {
     > .handle {
       min-width: 1px;
       cursor: col-resize;
@@ -338,12 +394,8 @@ export default {
       }
     }
   }
-  &.vertical {
+  &.horizontal {
     flex-direction: column;
-    > .pane {
-      width: 100%;
-      height: 50%;
-    }
     > .handle {
       min-height: 1px;
       cursor: row-resize;
@@ -368,14 +420,46 @@ export default {
     z-index: 1;
     width: 100%;
     height: 100%;
-    background-color: rgb(0,0,0,0.3);
+    background-color: rgba(0,0,0,0.3);
     cursor: pointer;
-    > .handle-open-icon {
+    > .handle-open-dots {
       color: white;
       position: absolute;
+      height: 20px;
+      width: 20px;
       top: 50%;
       left: 50%;
       transform: translateX(-50%) translateY(-50%);
+      &::before {
+        content: '';
+        width: 4px;
+        height: 4px;
+        border-radius: 4px;
+        background-color: white;
+        position: absolute;
+        top: 0;
+        left: 8px;
+      }
+      &::after {
+        content: '';
+        width: 4px;
+        height: 4px;
+        border-radius: 4px;
+        background-color: white;
+        position: absolute;
+        top: 16px;
+        left: 8px;
+      }
+      > span:before {
+        content: '';
+        width: 4px;
+        height: 4px;
+        border-radius: 4px;
+        background-color: white;
+        position: absolute;
+        top: 8px;
+        left: 8px;
+      }
     }
   }
 }
