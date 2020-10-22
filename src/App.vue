@@ -11,7 +11,13 @@
         min-size="60"
       >
         <template #paneL>
-          <div class="test-pane">pane1</div>
+          <div class="test-pane">
+            pane1<br />
+            size: 30%<br />
+            min-size: 60px<br />
+            use-toggle<br />
+            toggle-size: 60px
+          </div>
         </template>
         <template #paneR>
           <div class="test-pane">
@@ -25,11 +31,16 @@
               </template>
               <template #paneR>
                 <split-pane
-                  size="150px"
+                  size="200px"
+                  min-size="150px"
                   large-handle
                 >
                   <template #paneL>
-                    <div>pane3</div>
+                    <div>
+                      pane3<br/>
+                      size: 200px<br/>
+                      min-size: 150px
+                    </div>
                   </template>
                   <template #paneR>
                     <div>pane4</div>
