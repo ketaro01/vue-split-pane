@@ -1,0 +1,16 @@
+import { VueConstructor } from 'vue';
+import VueSplitPane from '@/components/SplitPane.vue';
+
+const install = (Vue: VueConstructor) => {
+  Vue.component(VueSplitPane.name, VueSplitPane);
+};
+
+if (typeof window !== 'undefined' && window.Vue) {
+  install(window.Vue);
+}
+
+export {
+  VueSplitPane,
+};
+
+export default install;
