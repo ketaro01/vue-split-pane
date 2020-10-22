@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div class="test-box">
-      <split-pane
+      <vue-split-pane
         size="30%"
         large-handle
         use-toggle
@@ -21,7 +21,7 @@
         </template>
         <template #paneR>
           <div class="test-pane">
-            <split-pane
+            <vue-split-pane
               size="200px"
               large-handle
               horizontal
@@ -30,7 +30,7 @@
                 <div>pane2</div>
               </template>
               <template #paneR>
-                <split-pane
+                <vue-split-pane
                   size="200px"
                   min-size="150px"
                   large-handle
@@ -45,23 +45,23 @@
                   <template #paneR>
                     <div>pane4</div>
                   </template>
-                </split-pane>
+                </vue-split-pane>
               </template>
-            </split-pane>
+            </vue-split-pane>
           </div>
         </template>
-      </split-pane>
+      </vue-split-pane>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import SplitPane from '@/components/SplitPane.vue';
+import VueSplitPane from '@/components/VueSplitPane.vue';
 
 @Component({
   components: {
-    SplitPane,
+    VueSplitPane,
   },
 })
 export default class App extends Vue {}

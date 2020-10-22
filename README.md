@@ -14,21 +14,21 @@ $ npm install --save dbseogns1212@vue-split-pane
 ```jsx
 // main.js
 import Vue from 'vue';
-import SplitPane from '@dbseogns1212/vue-split-pane';
+import VueSplitPane from '@dbseogns1212/vue-split-pane';
 import '@dbseogns1212/vue-split-pane/dist/splitPane.css';
 
-Vue.use(SplitPane);
+Vue.use(VueSplitPane);
 ```
 
 ### use component
 ```jsx
 // ###.vue
-import SplitPane from '@dbseogns1212/vue-split-pane';
+import { VueSplitPane } from '@dbseogns1212/vue-split-pane';
 import '@dbseogns1212/vue-split-pane/dist/splitPane.css';
 
 export default {
   components: {
-    SplitPane,
+    VueSplitPane,
   },
 };
 ```
@@ -37,7 +37,7 @@ export default {
 ```jsx
 // ###.vue
 <template>
-  <split-pane
+  <vue-split-pane
     size="30%"
     min-size="100px"
   >
@@ -47,6 +47,6 @@ export default {
     <template #paneR>
       <div style="width: 100%; height: 100%;">test2</div>
     </template>
-  </split-pane>
+  </vue-split-pane>
 </template>
 ```

@@ -81,7 +81,7 @@ interface SplitStyle {
 }
 
 @Component
-export default class SplitPane extends Vue {
+export default class VueSplitPane extends Vue {
   @Prop({
     type: Boolean,
     required: false,
@@ -188,7 +188,7 @@ export default class SplitPane extends Vue {
   get isMinimum(): boolean {
     if (!this.currentPixel && this.currentPixel !== 0) return false;
 
-    const minSize = SplitPane.getPixel(this.minSize);
+    const minSize = VueSplitPane.getPixel(this.minSize);
 
     if (!minSize) return false;
 
@@ -234,7 +234,7 @@ export default class SplitPane extends Vue {
 
   private resetSplitPane(): void {
     this.pageSize = this.getPageSize();
-    this.pixel = SplitPane.getPixel(this.size, this.pageSize);
+    this.pixel = VueSplitPane.getPixel(this.size, this.pageSize);
   }
 
   private onResize(): void {
@@ -291,7 +291,7 @@ export default class SplitPane extends Vue {
   }
 
   private setPixel(pixel: number, pageSize: number): void {
-    const minPixel = SplitPane.getPixel(this.minSize, pageSize);
+    const minPixel = VueSplitPane.getPixel(this.minSize, pageSize);
 
     if (minPixel && pixel < minPixel) {
       this.pixel = minPixel;
@@ -303,7 +303,7 @@ export default class SplitPane extends Vue {
       return;
     }
 
-    const maxPixel = SplitPane.getPixel(this.maxSize, pageSize);
+    const maxPixel = VueSplitPane.getPixel(this.maxSize, pageSize);
 
     if (maxPixel && pixel > maxPixel) {
       this.pixel = maxPixel;
@@ -323,7 +323,7 @@ export default class SplitPane extends Vue {
   }
 
   static getPixel(size: number|string, pageSize?: number): number {
-    const sizeInfo = SplitPane.getSize(size);
+    const sizeInfo = VueSplitPane.getSize(size);
 
     if (!sizeInfo) return 0;
 

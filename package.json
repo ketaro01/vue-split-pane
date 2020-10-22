@@ -1,7 +1,7 @@
 {
   "name": "@dbseogns1212/vue-split-pane",
   "homepage": "https://ketaro01.github.io/vue-split-pane",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "keyword": [
     "vue",
