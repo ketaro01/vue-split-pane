@@ -1,6 +1,6 @@
 {
-  "name": "@liam/vue-split-pane",
-  "version": "1.0.0",
+  "name": "@dbseogns1212/vue-split-pane",
+  "version": "0.1.0",
   "private": false,
   "keyword": [
     "vue",
@@ -8,15 +8,13 @@
     "vue-split-pane",
     "pixel",
     "percent",
-    "split-pane-pixel"
+    "split-pane-pixel",
+    "vue-split-pane-pixel"
   ],
-  "author": "liam <ketaro01@naver.com>",
+  "author": "dbseogns1212 <dbseogns1212@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ketaro01/vue-split-pane"
-  },
-  "bugs": {
     "url": "https://github.com/ketaro01/vue-split-pane"
   },
   "main": "dist/splitPane.common.js",
@@ -24,8 +22,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --target lib --name splitPane src/index.ts",
     "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint",
-    "publish": "npm publish --access-public"
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.6.5",
