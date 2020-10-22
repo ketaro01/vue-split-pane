@@ -11,6 +11,10 @@ if (typeof window !== 'undefined' && window.Vue) {
 
 export {
   VueSplitPane,
+  install,
 };
 
-export default install;
+export default {
+  VueSplitPane,
+  install,
+};
