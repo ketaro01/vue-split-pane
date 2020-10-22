@@ -1,16 +1,17 @@
 {
   "name": "@dbseogns1212/vue-split-pane",
   "homepage": "https://ketaro01.github.io/vue-split-pane",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": false,
-  "keyword": [
+  "keywords": [
     "vue",
     "split-pane",
     "vue-split-pane",
     "pixel",
     "percent",
     "split-pane-pixel",
-    "vue-split-pane-pixel"
+    "vue-split-pane-pixel",
+    "splitpane"
   ],
   "author": "dbseogns1212 <dbseogns1212@gmail.com>",
   "license": "MIT",
