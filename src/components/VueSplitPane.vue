@@ -51,18 +51,18 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { TOGGLE_OPTION } from '@/constants';
 
-export interface ToggleOptions {
+interface ToggleOptions {
   showHandle: boolean;
   toggleSize: number;
   style: object;
 }
 
-export interface SizeInfo {
+interface SizeInfo {
   type: string;
   value: number;
 }
 
-export interface PaneStyle {
+interface PaneStyle {
   left: {
     flex?: string|number;
     width?: string;
@@ -75,7 +75,7 @@ export interface PaneStyle {
   };
 }
 
-export interface SplitStyle {
+interface SplitStyle {
   userSelect: string;
   cursor: string;
 }
