@@ -51,18 +51,18 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { TOGGLE_OPTION } from '@/constants';
 
-interface ToggleOptions {
+export interface ToggleOptions {
   showHandle: boolean;
   toggleSize: number;
   style: object;
 }
 
-interface SizeInfo {
+export interface SizeInfo {
   type: string;
   value: number;
 }
 
-interface PaneStyle {
+export interface PaneStyle {
   left: {
     flex?: string|number;
     width?: string;
@@ -75,7 +75,7 @@ interface PaneStyle {
   };
 }
 
-interface SplitStyle {
+export interface SplitStyle {
   userSelect: string;
   cursor: string;
 }
@@ -84,14 +84,12 @@ interface SplitStyle {
 export default class VueSplitPane extends Vue {
   @Prop({
     type: Boolean,
-    required: false,
     default: false,
   })
   readonly horizontal: boolean
 
   @Prop({
     type: Boolean,
-    required: false,
     default: false,
   })
   readonly useToggle: boolean
