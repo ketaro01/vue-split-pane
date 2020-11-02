@@ -50,3 +50,15 @@ export default {
   </vue-split-pane>
 </template>
 ```
+
+### props
+name                | type               | default                                           | description
+:------------------ | :----------------: | :------------------------------------------------ | :-----------
+`horizontal`        | number             | 22                                                | horizontal flag
+`useToggle`         | boolean            | false                                             | use toggle btn
+`toggleOption`      | object             | { showHandle: false, toggleSize: 30, style: {} }  | toggle btn option 최소 사이즈로 내려가거나 toggle size 보다 작은경우 버튼으로 변경
+`minSize`           | number|string      | null                                              | ex) 100px or 10%
+`validMinRight`     | boolean            | true                                              | right pane min-size 적용 여부
+`maxSize`           | number|string      | null                                              | ex) 100px or 10%
+`size`              | number|string      | 100                                               | init size
+`largeHandle`       | boolean            | false                                             | split handle size
